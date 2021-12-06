@@ -18,14 +18,14 @@ void load() {
     load_doc_info();
 }
 
-void conjunctive_search(const std::vector<std::string>& terms) {
+void conjunctive_search(const std::vector<std::string>& terms, int option) {
     int n = terms.size();
     std::vector<inverted_list> lists(n);
     for (int i = 0; i < n; i++) {
         if (!lexicon.count(terms[i])) {
             return;
         }
-        lists[i] = inverted_list(terms[i]);
+        lists[i] = inverted_list(terms[i], option);
     }
     int did = 0;
     std::vector<int> dids;
@@ -37,12 +37,20 @@ void conjunctive_search(const std::vector<std::string>& terms) {
             did = lists[i].next_geq(did);
         }
         if (anchor_did == did && did != INT_MAX) {
-            std::vector<int> freqs(n), doc_nums(n);
-            for (int i = 0; i < n; i++) {
-                freqs[i] = lists[i].get_freq();
-                doc_nums[i] = lexicon[terms[i]].doc_num;
+            double score = 0;
+            if (option) {
+                for (int i = 0; i < n; i++) {
+                    score -= lists[i].get_score();
+                }
+            } else {
+                std::vector<int> freqs(n), doc_nums(n);
+                for (int i = 0; i < n; i++) {
+                    freqs[i] = lists[i].get_freq();
+                    doc_nums[i] = lexicon[terms[i]].doc_num;
+                }
+                score = -bm25(did, freqs, doc_nums);
             }
-            pq.push({-bm25(did, freqs, doc_nums), did});
+            pq.push({score, did});
             if (pq.size() > RESULT_NUM) {
                 pq.pop();
             }
@@ -56,17 +64,17 @@ void conjunctive_search(const std::vector<std::string>& terms) {
     }
 }
 
-void disjunctive_search(const std::vector<std::string>& terms) {
+void disjunctive_search(const std::vector<std::string>& terms, int option) {
     std::vector<double> score(doc_num + 1);
     for (std::string term : terms) {
         if (!lexicon.count(term)) {
             continue;
         }
-        inverted_list list = inverted_list(term);
+        inverted_list list = inverted_list(term, option);
         int did = list.next_geq(0);
         int doc_num = lexicon[term].doc_num;
         while (did != INT_MAX) {
-            score[did] += bm25(did, {list.get_freq()}, {doc_num});
+            score[did] += option ? list.get_score() : bm25(did, list.get_freq(), doc_num);
             did = list.next_geq(did + 1);
         }
     }

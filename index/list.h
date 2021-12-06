@@ -7,7 +7,7 @@
 
 namespace goose_index {
 
-void list(std::string pairs_file_name = MERGE_FILE_PREFIX + "0");
+void list(int option = 0, std::string pairs_file_name = MERGE_FILE_PREFIX + "0");
 
 }
 

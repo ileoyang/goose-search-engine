@@ -2,16 +2,25 @@
 
 #include <vector>
 #include <fstream>
+#include <cmath>
 
 #include "../compress/varbyte.h"
 #include "../compress/delta.h"
+#include "../util/bm25.h"
 
 namespace goose_index {
 
 static const int BUFFER_SIZE = 1 << 30;
 static const int BLOCK_SIZE = 64;
+static const double EPSILON = 1e-6;
+static const double LINEAR_MAX = 32.0034;
+static const double LINEAR_MIN = 0.00156031;
+static const double LINEAR_INTERVAL = LINEAR_MAX - LINEAR_MIN + EPSILON;
+static const double LOGARITHMIC_MAX = log(LINEAR_MAX);
+static const double LOGARITHMIC_MIN = log(LINEAR_MIN);
+static const double LOGARITHMIC_INTERVAL = LOGARITHMIC_MAX - LOGARITHMIC_MIN + EPSILON;
 
-void list(std::string pairs_file_name) {
+void list(int option, std::string pairs_file_name) {
     std::vector<uint64_t> pairs(BUFFER_SIZE / sizeof(uint64_t));
     std::ifstream is(pairs_file_name, std::ios::binary);
     std::ofstream os(INVERTED_INDEX_FILENAME, std::ios::binary);
@@ -47,13 +56,24 @@ void list(std::string pairs_file_name) {
                         block_diff_dids.emplace_back(dids[k] - dids[k - 1]);
                     }
                     last_dids.emplace_back(dids[n - 1]);
-                    std::vector<int> block_freqs(freqs.begin() + j, freqs.begin() + n); // frequencies in one block
                     size_t size = blocks.size();
                     varbyte::encode(block_diff_dids, blocks);
                     com_diff_did_sizes.emplace_back(blocks.size() - size);
-                    size = blocks.size();
-                    delta::encode(block_freqs, blocks);
-                    com_freq_sizes.emplace_back(blocks.size() - size);
+                    if (option) {
+                        for (int k = j; k < n; k++) {
+                            double score = bm25(dids[k], freqs[k], dids.size());
+                            if (option & LINEAR) {
+                                blocks.emplace_back(floor((score - LINEAR_MIN) / LINEAR_INTERVAL * (1 << 8)));
+                            } else if (option & LOGARITHMIC) {
+                                blocks.emplace_back(floor((log(score) - LOGARITHMIC_MIN) / LOGARITHMIC_INTERVAL * (1 << 8)));
+                            }
+                        }
+                    } else {
+                        size = blocks.size();
+                        std::vector<int> block_freqs(freqs.begin() + j, freqs.begin() + n); // frequencies in one block
+                        delta::encode(block_freqs, blocks);
+                        com_freq_sizes.emplace_back(blocks.size() - size);
+                    }
                 }
                 doc_nums.emplace_back(dids.size());
                 dids.clear();

@@ -11,4 +11,7 @@ static const std::string DOC_BEGINS_FILENAME = "doc_begins";
 static const std::string INVERTED_INDEX_FILENAME = "inverted_index";
 static const std::string LEXICON_VALUE_FILENAME = "lexicon_value";
 
+#define LINEAR 1 << 0
+#define LOGARITHMIC 1 << 1
+
 #endif //GOOSE_CONFIG_H

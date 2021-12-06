@@ -7,7 +7,7 @@
 
 inverted_list::inverted_list() {}
 
-inverted_list::inverted_list(std::string term) {
+inverted_list::inverted_list(std::string term, int option) {
     entry entry = lexicon[term];
     is.open(INVERTED_INDEX_FILENAME, std::ios::binary);
     is.seekg(entry.begin);
@@ -16,9 +16,12 @@ inverted_list::inverted_list(std::string term) {
     is.read(reinterpret_cast<char *>(&meta.last_dids[0]), block_num * sizeof(int));
     meta.com_diff_did_sizes.resize(block_num);
     is.read(reinterpret_cast<char *>(&meta.com_diff_did_sizes[0]), block_num * sizeof(size_t));
-    meta.com_freq_sizes.resize(block_num);
-    is.read(reinterpret_cast<char *>(&meta.com_freq_sizes[0]), block_num * sizeof(size_t));
+    if (!option) {
+        meta.com_freq_sizes.resize(block_num);
+        is.read(reinterpret_cast<char *>(&meta.com_freq_sizes[0]), block_num * sizeof(size_t));
+    }
     list_idx = block_idx = 0;
+    this->option = option;
 }
 
 int inverted_list::next_geq(int did) {
@@ -28,7 +31,8 @@ int inverted_list::next_geq(int did) {
     }
     if (target_list_idx >= list_idx) {
         for (int i = list_idx; i < target_list_idx; i++) {
-            is.seekg((meta.com_diff_did_sizes[i] + meta.com_freq_sizes[i]) * sizeof(size_t), std::ios::cur);
+            int block_size = option ? 64 : meta.com_freq_sizes[i];
+            is.seekg((meta.com_diff_did_sizes[i] + block_size) * sizeof(size_t), std::ios::cur);
         }
         com_diff_dids.resize(meta.com_diff_did_sizes[target_list_idx]);
         is.read(reinterpret_cast<char *>(&com_diff_dids[0]), meta.com_diff_did_sizes[target_list_idx]);
@@ -37,10 +41,15 @@ int inverted_list::next_geq(int did) {
         for (int i = 1; i < dids.size(); i++) {
             dids[i] += dids[i - 1];
         }
-        com_freqs.resize(meta.com_freq_sizes[target_list_idx]);
-        is.read(reinterpret_cast<char *>(&com_freqs[0]), meta.com_freq_sizes[target_list_idx]);
-        freqs.clear();
-        delta::decode(com_freqs, freqs);
+        if (option) {
+            scores.resize(dids.size());
+            is.read(reinterpret_cast<char *>(&scores[0]), dids.size());
+        } else {
+            com_freqs.resize(meta.com_freq_sizes[target_list_idx]);
+            is.read(reinterpret_cast<char *>(&com_freqs[0]), meta.com_freq_sizes[target_list_idx]);
+            freqs.clear();
+            delta::decode(com_freqs, freqs);
+        }
         list_idx = target_list_idx + 1;
         block_idx = 0;
     }
@@ -50,4 +59,8 @@ int inverted_list::next_geq(int did) {
 
 int inverted_list::get_freq() {
     return freqs[block_idx];
+}
+
+uint8_t inverted_list::get_score() {
+    return scores[block_idx];
 }

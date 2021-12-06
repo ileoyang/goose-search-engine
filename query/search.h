@@ -8,9 +8,9 @@ namespace goose_query {
 
 void load();
 
-void conjunctive_search(const std::vector<std::string>& terms);
+void conjunctive_search(const std::vector<std::string>& terms, int option = 0);
 
-void disjunctive_search(const std::vector<std::string>& terms);
+void disjunctive_search(const std::vector<std::string>& terms, int option = 0);
 
 }
 
