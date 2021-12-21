@@ -6,11 +6,15 @@
 
 namespace goose_query {
 
-void load();
+void load(int option);
 
 void conjunctive_search(const std::vector<std::string>& terms, int option = 0);
 
 void disjunctive_search(const std::vector<std::string>& terms, int option = 0);
+
+void search(const std::vector<std::string>& terms, int option);
+
+void auto_complete(const std::string& term);
 
 }
 

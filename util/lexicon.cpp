@@ -6,8 +6,9 @@
 #include "../config.h"
 
 std::unordered_map<std::string, entry> lexicon{};
+radix_tree radix;
 
-void load_lexicon() {
+void load_lexicon(int option) {
     std::ifstream is(TERMS_FILENAME);
     std::string term;
     std::vector<std::string> terms;
@@ -23,5 +24,10 @@ void load_lexicon() {
     is.read(reinterpret_cast<char *>(&doc_nums[0]), len * sizeof(int));
     for (int i = 0; i < len; i++) {
         lexicon[terms[i]] = entry{begins[i], doc_nums[i]};
+    }
+    if (option & RADIX) {
+        for (int i = 0; i < 100000; i++) {
+            radix.insert(terms[i]);
+        }
     }
 }

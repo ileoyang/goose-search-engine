@@ -13,5 +13,17 @@ static const std::string LEXICON_VALUE_FILENAME = "lexicon_value";
 
 #define LINEAR 1 << 0
 #define LOGARITHMIC 1 << 1
+#define FAGIN 1 << 2
+#define RADIX 1 << 3
+#define CONJUNCTIVE 1 << 4
+#define DISJUNCTIVE 1 << 5
+
+#define PARSE 1
+#define MERGE 2
+#define LIST 3
+#define LOAD 4
+#define QUERY 5
+#define AUTOC 6
+#define QUIT 7
 
 #endif //GOOSE_CONFIG_H

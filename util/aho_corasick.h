@@ -19,4 +19,6 @@ public:
     std::vector<std::pair<int, int>> query(const std::string& document);
 };
 
+int index(char ch);
+
 #endif //GOOSE_AHO_CORASICK_H

@@ -8,13 +8,14 @@
 #include "../util/bm25.h"
 #include "../util/doc_info.h"
 #include "snippet.h"
+#include "../config.h"
 
 namespace goose_query {
 
 const int RESULT_NUM = 10;
 
-void load() {
-    load_lexicon();
+void load(int option) {
+    load_lexicon(option);
     load_doc_info();
 }
 
@@ -27,34 +28,81 @@ void conjunctive_search(const std::vector<std::string>& terms, int option) {
         }
         lists[i] = inverted_list(terms[i], option);
     }
-    int did = 0;
-    std::vector<int> dids;
     std::priority_queue<std::pair<double, int>> pq;
-    while (did != INT_MAX) {
-        did = lists[0].next_geq(did);
-        int anchor_did = did;
-        for (int i = 1; i < n; i++) {
-            did = lists[i].next_geq(did);
+    if (option & (LINEAR | FAGIN)) {
+        std::vector<std::pair<int, int>> elements[n];
+        std::unordered_map<int, int> score_map[n];
+        int len = INT_MAX;
+        for (int i = 0; i < n; i++) {
+            // simulate sequential list and lookup table
+            int did = lists[i].next_geq(0);
+            while (did != INT_MAX) {
+                elements[i].emplace_back(std::make_pair(did, lists[i].get_score()));
+                score_map[i][did] = lists[i].get_score();
+                did = lists[i].next_geq(did + 1);
+            }
+            len = std::min(len, (int) elements[i].size());
+            std::sort(elements[i].begin(), elements[i].end(), [](const std::pair<int, int> o1, const std::pair<int, int> o2) {
+                return o1.second > o2.second;
+            });
         }
-        if (anchor_did == did && did != INT_MAX) {
-            double score = 0;
-            if (option) {
-                for (int i = 0; i < n; i++) {
-                    score -= lists[i].get_score();
+        std::unordered_map<int, std::pair<int, int>> ocr_map;
+        int cnt = 0;
+        for (int i = 0; i < len; i++) {
+            for (int j = 0; j < n; j++) {
+                int did = elements[j][i].first;
+                ocr_map[did].first |= (1 << j);
+                ocr_map[did].second += score_map[j][did];
+                if (ocr_map[did].first == (1 << n) - 1 && ++cnt == RESULT_NUM) {
+                    break;
                 }
-            } else {
-                std::vector<int> freqs(n), doc_nums(n);
-                for (int i = 0; i < n; i++) {
-                    freqs[i] = lists[i].get_freq();
-                    doc_nums[i] = lexicon[terms[i]].doc_num;
+            }
+            if (cnt == RESULT_NUM) {
+                break;
+            }
+        }
+        for (auto [did, ocr] : ocr_map) {
+            for (int i = 0; i < n; i++) {
+                if (!(ocr.first & (1 << i)) && score_map[i].count(did)) {
+                    ocr.first |= (1 << i);
+                    ocr.second += score_map[i][did];
                 }
-                score = -bm25(did, freqs, doc_nums);
             }
-            pq.push({score, did});
-            if (pq.size() > RESULT_NUM) {
-                pq.pop();
+            if (ocr.first == (1 << n) - 1) {
+                pq.emplace(std::make_pair(-ocr.second, did));
+                if (pq.size() > RESULT_NUM) {
+                    pq.pop();
+                }
             }
-            did++;
+        }
+    } else {
+        int did = 0;
+        while (did != INT_MAX) {
+            did = lists[0].next_geq(did);
+            int anchor_did = did;
+            for (int i = 1; i < n; i++) {
+                did = lists[i].next_geq(did);
+            }
+            if (anchor_did == did && did != INT_MAX) {
+                double score = 0;
+                if (option) {
+                    for (int i = 0; i < n; i++) {
+                        score += lists[i].get_score();
+                    }
+                } else {
+                    std::vector<int> freqs(n), doc_nums(n);
+                    for (int i = 0; i < n; i++) {
+                        freqs[i] = lists[i].get_freq();
+                        doc_nums[i] = lexicon[terms[i]].doc_num;
+                    }
+                    score = bm25(did, freqs, doc_nums);
+                }
+                pq.push({-score, did});
+                if (pq.size() > RESULT_NUM) {
+                    pq.pop();
+                }
+                did++;
+            }
         }
     }
     while (pq.size()) {
@@ -91,6 +139,20 @@ void disjunctive_search(const std::vector<std::string>& terms, int option) {
         auto [_, did] = pq.top();
         pq.pop();
         std::cout << urls[did - 1] << std::endl << get_snippet(did, terms) << std::endl;
+    }
+}
+
+void search(const std::vector<std::string>& terms, int option) {
+    if (option & CONJUNCTIVE) {
+        conjunctive_search(terms, option);
+    } else if (option & DISJUNCTIVE) {
+        disjunctive_search(terms, option);
+    }
+}
+
+void auto_complete(const std::string& term) {
+    for (std::string _term : radix.prefix(term)) {
+        std::cout << _term << std::endl;
     }
 }
 
