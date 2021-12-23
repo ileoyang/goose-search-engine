@@ -20,6 +20,7 @@ void load(int option) {
 }
 
 void conjunctive_search(const std::vector<std::string>& terms, int option) {
+    option &= (LINEAR | LOGARITHMIC | FAGIN);
     int n = terms.size();
     std::vector<inverted_list> lists(n);
     for (int i = 0; i < n; i++) {
@@ -113,6 +114,7 @@ void conjunctive_search(const std::vector<std::string>& terms, int option) {
 }
 
 void disjunctive_search(const std::vector<std::string>& terms, int option) {
+    option &= (LINEAR | LOGARITHMIC | FAGIN);
     std::vector<double> score(doc_num + 1);
     for (std::string term : terms) {
         if (!lexicon.count(term)) {

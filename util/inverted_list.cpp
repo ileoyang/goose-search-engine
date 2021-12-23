@@ -8,6 +8,7 @@
 inverted_list::inverted_list() {}
 
 inverted_list::inverted_list(std::string term, int option) {
+    option &= (LINEAR | LOGARITHMIC);
     entry entry = lexicon[term];
     is.open(INVERTED_INDEX_FILENAME, std::ios::binary);
     is.seekg(entry.begin);
