@@ -1,5 +1,7 @@
 #include "inverted_list.h"
 
+#include <climits>
+
 #include "lexicon.h"
 #include "../config.h"
 #include "../compress/varbyte.h"

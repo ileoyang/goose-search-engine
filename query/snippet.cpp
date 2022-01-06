@@ -2,13 +2,14 @@
 
 #include <array>
 #include <fstream>
+#include <tuple>
 
 #include "../config.h"
 #include "../util/aho_corasick.h"
 
 namespace goose_query {
 
-const int SNIPPET_LEN = 500;
+const int SNIPPET_LEN = 300;
 
 const std::string get_doc(int did) {
     std::array<size_t, 2> doc_interval;
@@ -60,32 +61,32 @@ std::string get_snippet(int did, const std::vector<std::string>& terms) {
         int m = tuple_idxs.size();
         for (int i = 0, j = 0; i < m; i++) {
             while (j < m && sel_term_num < try_term_num) {
-                if (!cnt[get<0>(tuple_idxs[j])]) {
+                if (!cnt[std::get<0>(tuple_idxs[j])]) {
                     sel_term_num++;
-                    quota -= terms[get<0>(tuple_idxs[j])].size();
+                    quota -= terms[std::get<0>(tuple_idxs[j])].size();
                 }
-                cnt[get<0>(tuple_idxs[j])]++;
+                cnt[std::get<0>(tuple_idxs[j])]++;
                 j++;
             }
-            if (sel_term_num == try_term_num && get<2>(tuple_idxs[j - 1]) - get<1>(tuple_idxs[i]) + quota < min_len) {
-                min_len = get<2>(tuple_idxs[j - 1]) - get<1>(tuple_idxs[i]) + quota;
+            if (sel_term_num == try_term_num && std::get<2>(tuple_idxs[j - 1]) - std::get<1>(tuple_idxs[i]) + quota < min_len) {
+                min_len = std::get<2>(tuple_idxs[j - 1]) - std::get<1>(tuple_idxs[i]) + quota;
                 begin = i;
                 end = j - 1;
             }
-            if (!--cnt[get<0>(tuple_idxs[i])]) {
+            if (!--cnt[std::get<0>(tuple_idxs[i])]) {
                 sel_term_num--;
-                quota += terms[get<0>(tuple_idxs[i])].size();
+                quota += terms[std::get<0>(tuple_idxs[i])].size();
             }
         }
         if (min_len != SNIPPET_LEN) {
-            snippet_idxs.emplace_back(std::make_pair(get<1>(tuple_idxs[begin]), get<2>(tuple_idxs[end])));
+            snippet_idxs.emplace_back(std::make_pair(std::get<1>(tuple_idxs[begin]), std::get<2>(tuple_idxs[end])));
             int pos = 0;
             std::vector<bool> sel_terms(n);
             for (int i = begin; i <= end; i++) {
-                sel_terms[get<0>(tuple_idxs[i])] = true;
+                sel_terms[std::get<0>(tuple_idxs[i])] = true;
             }
             for (auto term_idx : tuple_idxs) {
-                if (!sel_terms[get<0>(term_idx)]) {
+                if (!sel_terms[std::get<0>(term_idx)]) {
                     tuple_idxs[pos++] = term_idx;
                 }
             }

@@ -2,6 +2,7 @@
 #define GOOSE_DELTA_H
 
 #include <vector>
+#include <stdint.h>
 
 namespace delta {
 

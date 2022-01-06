@@ -2,6 +2,7 @@
 #define GOOSE_VARBYTE_H
 
 #include <vector>
+#include <stdint.h>
 
 namespace varbyte {
 

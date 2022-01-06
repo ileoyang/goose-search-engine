@@ -3,6 +3,8 @@
 
 #include <unordered_map>
 #include <string>
+#include <memory>
+#include <vector>
 
 struct node {
     std::unordered_map<char, std::shared_ptr<node>> son;

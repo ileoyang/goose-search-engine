@@ -14,12 +14,17 @@ Goose is a search engine for indexing and querying TREC files.
 * Search autocomplete based on radix tree.
 * Linear and logarithmic index quantization.
 
+## Dataset
+The document dataset should be in TREC DOC format. My recommended dataset is `msmarco-docs.trec` from [TREC 2020 Deep Learning Track Guidelines](https://microsoft.github.io/msmarco/TREC-Deep-Learning-2020).
+
 ## Quick Start
 ```shell
 # compile
 mkdir build-dir && cd build-dir
 cmake ..
 make
+# add dataset
+cp [YOUR DATASET PATH] build-dir/msmarco-docs.trec
 # run
 ./goose
 $ parse
@@ -29,6 +34,18 @@ $ load
 $ query -con Hello World
 ```
 This project configures the default filename (`config.h`) to minimize command.
+
+Or you can use Docker for convenience:
+```shell
+cp [YOUR DATASET PATH] [PROJECT ROOT DIR]
+docker build --build-arg trecfilepath=[YOUR DATASET NAME] -t goose .
+docker run -dt --name goose goose
+docker exec -it goose /bin/bash
+cd build-dir
+./goose
+$ load
+$ query -con Hello World
+```
 
 ## Command
 | Syntax | Description |

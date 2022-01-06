@@ -7,14 +7,26 @@
 #include "index/list.h"
 #include "query/search.h"
 
-int main() {
+int main(int argc, char* argv[]) {
     std::cout << R"(
     ╔═╗┌─┐┌─┐┌─┐┌─┐
     ║ ╦│ ││ │└─┐├┤
     ╚═╝└─┘└─┘└─┘└─┘
     )" << std::endl;
     std::unordered_map<std::string, int> arg_map{{"lin", LINEAR}, {"log", LOGARITHMIC}, {"fag", FAGIN}, {"rad", RADIX}, {"con", CONJUNCTIVE}, {"dis", DISJUNCTIVE}, {"parse", PARSE}, {"merge", MERGE}, {"list", LIST}, {"load", LOAD}, {"query", QUERY}, {"autoc", AUTOC}, {"quit", QUIT}};
-    while (1) {
+    if (argc == 2) {
+        switch (arg_map[argv[1]]) {
+            case PARSE:
+                goose_index::parse();
+                break;
+            case MERGE:
+                goose_index::merge();
+                break;
+            case LIST:
+                goose_index::list();
+                break;
+        }
+    } else while (1) {
         std::cout << "$ ";
         std::string line;
         std::getline(std::cin, line);

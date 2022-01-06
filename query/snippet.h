@@ -2,6 +2,7 @@
 #define GOOSE_SNIPPET_H
 
 #include <string>
+#include <vector>
 
 namespace goose_query {
 

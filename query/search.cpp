@@ -2,6 +2,8 @@
 
 #include <queue>
 #include <iostream>
+#include <climits>
+#include <algorithm>
 
 #include "../util/inverted_list.h"
 #include "../util/lexicon.h"

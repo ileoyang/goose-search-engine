@@ -3,6 +3,7 @@
 #include <vector>
 #include <unordered_map>
 #include <fstream>
+#include <algorithm>
 
 namespace goose_index {
 
