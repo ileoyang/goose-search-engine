@@ -15,10 +15,22 @@
 namespace goose_query {
 
 const int RESULT_NUM = 10;
+int rid = 0;
 
 void load(int option) {
     load_lexicon(option);
     load_doc_info();
+}
+
+void format_res(std::priority_queue<std::pair<double, int>>& pq, const std::vector<std::string>& terms) {
+    std::ofstream os_res("query-res/res" + std::to_string(rid++));
+    while (pq.size()) {
+        auto [_, did] = pq.top();
+        pq.pop();
+        std::string res = urls[did - 1] + "\n" + get_snippet(did, terms) + "\n";
+        std::cout << res;
+        os_res.write(&res[0], res.size());
+    }
 }
 
 void conjunctive_search(const std::vector<std::string>& terms, int option) {
@@ -108,11 +120,7 @@ void conjunctive_search(const std::vector<std::string>& terms, int option) {
             }
         }
     }
-    while (pq.size()) {
-        auto [_, did] = pq.top();
-        pq.pop();
-        std::cout << urls[did - 1] << std::endl << get_snippet(did, terms) << std::endl;
-    }
+    format_res(pq, terms);
 }
 
 void disjunctive_search(const std::vector<std::string>& terms, int option) {
@@ -139,11 +147,7 @@ void disjunctive_search(const std::vector<std::string>& terms, int option) {
             pq.pop();
         }
     }
-    while (pq.size()) {
-        auto [_, did] = pq.top();
-        pq.pop();
-        std::cout << urls[did - 1] << std::endl << get_snippet(did, terms) << std::endl;
-    }
+    format_res(pq, terms);
 }
 
 void search(const std::vector<std::string>& terms, int option) {
