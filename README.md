@@ -39,13 +39,14 @@ Or you can use Docker for convenience:
 ```shell
 cp [YOUR DATASET PATH] [PROJECT ROOT DIR]
 docker build --build-arg trecfilepath=[YOUR DATASET NAME] -t goose .
-docker run -dt --name goose goose
+docker run -dt -p 5000:5000 --name goose goose
 docker exec -it goose /bin/bash
 cd build-dir
 ./goose
 $ load
 $ query -con Hello World
 ```
+This project is also web accessible: http://localhost:5000/.
 
 ## Command
 | Syntax | Description |

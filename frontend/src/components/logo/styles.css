@@ -1,0 +1,12 @@
+.home-logo {
+  margin: 200px auto 50px auto;
+  object-fit: contain;
+  display: block;
+  height: 95px;
+}
+.search-logo {
+  padding: 3px 28px 0 25px;
+  top: 4px;
+  height: 40px;
+  margin-right: 40px;
+}

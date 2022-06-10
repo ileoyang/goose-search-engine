@@ -2,3 +2,4 @@ cmake-build-debug
 build-dir
 .idea
 node_modules
+.DS_Store

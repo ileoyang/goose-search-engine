@@ -1,0 +1,27 @@
+.home-header {
+  display: flex;
+  align-items: center;
+  padding-right: 30px;
+  padding-top: 15px;
+  justify-content: flex-end;
+}
+.home-header a {
+  color: inherit;
+  text-decoration: none;
+  padding-left: 15px;
+}
+.home-header img {
+  width: 32px;
+  height: 32px;
+}
+.search-header {
+  display: flex;
+  position: sticky;
+  top: 0;
+  background-color: white;
+  z-index: 100;
+  padding-top: 20px;
+  align-items: flex-start;
+  border-bottom: 1px solid rgba(202, 202, 202, 0.575);
+  padding-bottom: 10px;
+}

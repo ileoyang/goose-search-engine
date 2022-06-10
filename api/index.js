@@ -5,6 +5,7 @@ import fs from 'fs';
 
 const app = express();
 app.use(express.json());
+app.use(express.static('../frontend/build'));
 
 chdir('../build-dir');
 const proc = spawn('./goose');
@@ -35,4 +36,4 @@ app.post('/query', async (req, res) => {
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
-app.listen(3000);
+app.listen(5000);

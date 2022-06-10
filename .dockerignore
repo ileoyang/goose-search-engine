@@ -6,3 +6,7 @@ build-dir
 .gitignore
 README.md
 node_modules
+.DS_Store
+.vscode
+build
+.prettierrc.json
