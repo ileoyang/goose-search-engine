@@ -20,7 +20,7 @@ const SearchList = () => {
         terms: terms,
         options: ['-con'],
       };
-      const res = await axios.post('http://localhost:5000/query', body);
+      const res = await axios.post('/api/query', body);
       setResults(res.data);
     } catch (error) {
       console.log(error);
