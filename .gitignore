@@ -4,3 +4,4 @@ build-dir
 node_modules
 .DS_Store
 restbed
+*.trec

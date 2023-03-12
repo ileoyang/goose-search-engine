@@ -46,6 +46,7 @@ int main(int argc, char* argv[]) {
         resource->set_method_handler("GET", get_method_handler);
         auto settings = std::make_shared<restbed::Settings>();
         settings->set_port(5000);
+        settings->set_default_header("Access-Control-Allow-Origin", "*");
         auto service = std::make_shared<restbed::Service>();
         service->publish(resource);
         service->set_ready_handler(service_ready_handler);

@@ -47,16 +47,10 @@ This project configures the default filename (`config.h`) to minimize command.
 
 Or you can use Docker for convenience:
 ```shell
-cp $dataset_path $project_root_path
-docker build --build-arg trecfilepath=$dataset_name -t goose .
-docker run -d -p 5000:5000 --name goose goose
+cp $dataset_path $project_root_path/tmp.trec
+docker-compose up -d
 ```
-The Docker installation also provides a GET API to make the engine web accessible. The API has the endpoint `http://localhost:5000/api/search` with the following query params:
-
-| Name | Type | Optional | Description |
-| ----------- | ----------- | ----------- | ----------- |
-| terms | String | False | Search terms, separated by commas. E.g., `Hello,World`. |
-| options | String | False | Search options, separated by commas. E.g., `con`. |
+The Docker installation also makes the engine web accessible through `http://localhost:5000`.
 
 
 ## Command

@@ -7,7 +7,7 @@ const HomeGooseLogo = () => (
 );
 
 const DocumentLogo = () => (
-  <a href="http://lyang.tech/projects/goose">
+  <a href="http://lyang.tech/project/goose">
     <img src="/document-logo.png" alt="Document Logo" />
   </a>
 );

@@ -16,11 +16,9 @@ const SearchList = () => {
   const getResults = async () => {
     try {
       const terms = query.get('terms').split(' ');
-      const body = {
-        terms: terms,
-        options: ['-con'],
-      };
-      const res = await axios.post('/api/query', body);
+      const res = await axios.get(
+        `/api/search?terms=${terms.join(',')}&options=con`
+      );
       setResults(res.data);
     } catch (error) {
       console.log(error);

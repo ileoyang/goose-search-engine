@@ -1,6 +1,5 @@
 FROM ubuntu:20.04
 
-ARG trecfilepath
 ENV DEBIAN_FRONTEND noninteractive
 WORKDIR /usr/src/app
 COPY . .
@@ -20,7 +19,7 @@ RUN apt-get install nlohmann-json3-dev -y
 RUN mkdir build-dir && cd build-dir && cmake .. && make
 
 # Add the document dataset.
-RUN mv $trecfilepath build-dir/msmarco-docs.trec
+RUN mv tmp.trec build-dir/msmarco-docs.trec
 
 # Load the engine runtime environment.
 RUN cd build-dir && ./goose parse && ./goose merge && ./goose list
