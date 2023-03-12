@@ -15,31 +15,31 @@
 namespace goose_query {
 
 const int RESULT_NUM = 10;
-int rid = 0;
 
 void load(int option) {
     load_lexicon(option);
     load_doc_info();
 }
 
-void format_res(std::priority_queue<std::pair<double, int>>& pq, const std::vector<std::string>& terms) {
-    std::ofstream os_res("query-res/res" + std::to_string(rid++));
+std::vector<std::pair<std::string, std::string>> format_res(std::priority_queue<std::pair<double, int>>& pq, const std::vector<std::string>& terms) {
+    std::vector<std::pair<std::string, std::string>> results;
     while (pq.size()) {
         auto [_, did] = pq.top();
         pq.pop();
         std::string res = urls[did - 1] + "\n" + get_snippet(did, terms) + "\n";
         std::cout << res;
-        os_res.write(&res[0], res.size());
+        results.emplace_back(std::make_pair(urls[did - 1], get_snippet(did, terms)));
     }
+    return results;
 }
 
-void conjunctive_search(const std::vector<std::string>& terms, int option) {
+std::vector<std::pair<std::string, std::string>> conjunctive_search(const std::vector<std::string>& terms, int option) {
     option &= (LINEAR | LOGARITHMIC | FAGIN);
     int n = terms.size();
     std::vector<inverted_list> lists(n);
     for (int i = 0; i < n; i++) {
         if (!lexicon.count(terms[i])) {
-            return;
+            return {};
         }
         lists[i] = inverted_list(terms[i], option);
     }
@@ -120,10 +120,10 @@ void conjunctive_search(const std::vector<std::string>& terms, int option) {
             }
         }
     }
-    format_res(pq, terms);
+    return format_res(pq, terms);
 }
 
-void disjunctive_search(const std::vector<std::string>& terms, int option) {
+std::vector<std::pair<std::string, std::string>> disjunctive_search(const std::vector<std::string>& terms, int option) {
     option &= (LINEAR | LOGARITHMIC | FAGIN);
     std::vector<double> score(doc_num + 1);
     for (std::string term : terms) {
@@ -147,14 +147,14 @@ void disjunctive_search(const std::vector<std::string>& terms, int option) {
             pq.pop();
         }
     }
-    format_res(pq, terms);
+    return format_res(pq, terms);
 }
 
-void search(const std::vector<std::string>& terms, int option) {
+std::vector<std::pair<std::string, std::string>> search(const std::vector<std::string>& terms, int option) {
     if (option & CONJUNCTIVE) {
-        conjunctive_search(terms, option);
+        return conjunctive_search(terms, option);
     } else if (option & DISJUNCTIVE) {
-        disjunctive_search(terms, option);
+        return disjunctive_search(terms, option);
     }
 }
 

@@ -2,6 +2,8 @@
 
 #include <vector>
 #include <fstream>
+#include <dirent.h>
+#include <cstring>
 
 namespace goose_index {
 
@@ -59,7 +61,15 @@ struct bin_heap {
     }
 };
 
-void merge(std::string ipairs_file_prefix, int ipairs_file_num, std::string opairs_file_prefix, int opairs_file_num) {
+void merge(std::string ipairs_file_prefix, std::string opairs_file_prefix, int opairs_file_num) {
+    int ipairs_file_num = 0;
+    DIR* dir = opendir(".");
+    dirent* dp;
+    while ((dp = readdir(dir)) != nullptr) {
+        if (dp->d_type == DT_REG && std::string(dp->d_name, dp->d_name + ipairs_file_prefix.length()) == ipairs_file_prefix) {
+            ipairs_file_num++;
+        }
+    }
     int max_degree = (ipairs_file_num + opairs_file_num - 1) / opairs_file_num;
     for (int i = 0; i < ipairs_file_num; i += max_degree) {
         int degree = std::min(max_degree, ipairs_file_num - i); // number of files to merge

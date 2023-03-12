@@ -13,45 +13,56 @@ Goose is a search engine for indexing and querying TREC files.
 * Top-k search pruning by Fagin's algorithm.
 * Search autocomplete based on radix tree.
 * Linear and logarithmic index quantization.
+* REST APIs which directly handle queries.
 
 ## Dataset
 The document dataset should be in TREC DOC format. My recommended dataset is `msmarco-docs.trec` from [TREC 2020 Deep Learning Track Guidelines](https://microsoft.github.io/msmarco/TREC-Deep-Learning-2020).
 
 ## Quick Start
+Build [restbed](https://github.com/Corvusoft/restbed) and [nlohmann/json](https://github.com/nlohmann/json), and put include and library files under `restbed/distribution`.
 ```shell
-# compile
+# Compile the program.
 mkdir build-dir && cd build-dir
 cmake ..
 make
-# add dataset
-cp [YOUR DATASET PATH] build-dir/msmarco-docs.trec
-# run
+
+# Add the dataset.
+cp $dataset_path build-dir/msmarco-docs.trec
+
+# Create query indices.
 ./goose
 $ parse
 $ merge
 $ list
+
+# Query at the command line.
 $ load
 $ query -con Hello World
+
+# Query on the REST API.
+$ quit
+./goose -api
 ```
 This project configures the default filename (`config.h`) to minimize command.
 
 Or you can use Docker for convenience:
 ```shell
-cp [YOUR DATASET PATH] [PROJECT ROOT DIR]
-docker build --build-arg trecfilepath=[YOUR DATASET NAME] -t goose .
-docker run -dt -p 5000:5000 --name goose goose
-docker exec -it goose /bin/bash
-cd build-dir
-./goose
-$ load
-$ query -con Hello World
+cp $dataset_path $project_root_path
+docker build --build-arg trecfilepath=$dataset_name -t goose .
+docker run -d -p 5000:5000 --name goose goose
 ```
-This project is also web accessible: http://localhost:5000/.
+The Docker installation also provides a GET API to make the engine web accessible. The API has the endpoint `http://localhost:5000/api/search` with the following query params:
+
+| Name | Type | Optional | Description |
+| ----------- | ----------- | ----------- | ----------- |
+| terms | String | False | Search terms, separated by commas. E.g., `Hello,World`. |
+| options | String | False | Search options, separated by commas. E.g., `con`. |
+
 
 ## Command
 | Syntax | Description |
 | ----------- | ----------- |
-| `./goose` | Start Goose |
+| `./goose [OPTION]` | Start Goose |
 | `parse` | Parse TREC file into sorted postings |
 | `merge` | Merge sorted postings |
 | `list [OPTION]` | List sorted postings to inverted index |
@@ -69,3 +80,4 @@ This project is also web accessible: http://localhost:5000/.
 | `-rad` | Radix tree | `load` |
 | `-con` | Conjunctive query | `query` |
 | `-dis` | Disjunctive query | `query` |
+| `-api` | REST API | `./goose` |
